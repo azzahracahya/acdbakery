@@ -1,6 +1,28 @@
 /**
  * app.js — ACD Bakery Kiosk
+ * ✅ Sudah terintegrasi dengan Google Sheets
  */
+
+/* ══════════════════════════════════════════════════════════════
+   ⚠️  GANTI URL INI dengan URL Apps Script kamu!
+   ══════════════════════════════════════════════════════════════ */
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxGNji9F-p_NoVfe4F_U4ta8ZkY0v77EPcDOLzkBjalMxydtjdYVbKjFoJrCNsLW9.../exec";
+/* ══════════════════════════════════════════════════════════════ */
+
+/* ── Google Sheets: Kirim Data Order ───────────────────────── */
+async function kirimKeSheet(orderData) {
+  try {
+    await fetch(SHEET_URL, {
+      method:  "POST",
+      mode:    "no-cors",   // wajib untuk Google Apps Script
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(orderData)
+    });
+    console.log("✅ Data order berhasil dikirim ke Google Sheets");
+  } catch (err) {
+    console.error("❌ Gagal kirim ke Google Sheets:", err);
+  }
+}
 
 /* ── State ─────────────────────────────────────────────────── */
 let cart         = [];
@@ -46,7 +68,7 @@ function stockBadge(stock) {
   return '<span class="stock-badge ok">Stok ' + stock + '</span>';
 }
 
-/* ── Get live stock (from products, reduced by pending carts if needed) ── */
+/* ── Get live stock ─────────────────────────────────────────── */
 function getStock(id, cat) {
   const p = products[cat].find(x => x.id === id);
   return p ? p.stock : 0;
@@ -95,10 +117,9 @@ function buildGrid(cat) {
     badge.textContent = cat === 'large' ? 'LARGE' : 'SMALL';
     imgWrap.appendChild(badge);
 
-    // Stock badge on image
     const stockEl = document.createElement('span');
-    stockEl.className   = 'product-stock-badge';
-    stockEl.innerHTML   = stockBadge(p.stock);
+    stockEl.className = 'product-stock-badge';
+    stockEl.innerHTML = stockBadge(p.stock);
     imgWrap.appendChild(stockEl);
 
     const info = document.createElement('div');
@@ -163,7 +184,6 @@ function openModal(p, cat) {
   document.getElementById('m-desc').textContent  = p.desc;
   document.getElementById('m-price').textContent = fmt(p.price);
 
-  // Rating & Stock di modal
   document.getElementById('m-rating').innerHTML =
     renderStars(p.rating) + ' <span class="rating-num">' + p.rating.toFixed(1) + '</span>';
   document.getElementById('m-stock').innerHTML = stockBadge(p.stock);
@@ -368,10 +388,10 @@ function selectEwalletNew(btn) {
   activeEw   = wallet;
   selectedEw = wallet;
 
-  document.getElementById('ew-card-new').style.background = bg;
-  document.getElementById('ew-card-name').textContent     = wallet;
-  document.getElementById('ew-card-emoji').textContent    = emoji;
-  document.getElementById('ew-card-num').textContent      = num;
+  document.getElementById('ew-card-new').style.background  = bg;
+  document.getElementById('ew-card-name').textContent      = wallet;
+  document.getElementById('ew-card-emoji').textContent     = emoji;
+  document.getElementById('ew-card-num').textContent       = num;
   document.getElementById('ew-number-display').textContent = num;
 
   const subtotal = cart.reduce((a, c) => a + c.price * c.qty, 0);
@@ -501,7 +521,6 @@ function clearPin() {
 
 /* ── Stock Validation ───────────────────────────────────────── */
 function validateStock() {
-  // Cek apakah ada item di keranjang yang melebihi stok tersedia
   for (const item of cart) {
     const cat = item.cat;
     const p   = products[cat].find(x => x.id === item.id);
@@ -519,15 +538,11 @@ function validateStock() {
 }
 
 function deductStock() {
-  // Kurangi stok setelah order dikonfirmasi
   cart.forEach(item => {
     const cat = item.cat;
     const p   = products[cat].find(x => x.id === item.id);
-    if (p) {
-      p.stock = Math.max(0, p.stock - item.qty);
-    }
+    if (p) p.stock = Math.max(0, p.stock - item.qty);
   });
-  // Rebuild grid supaya tampilan stok terupdate
   buildGrid('small');
   buildGrid('large');
 }
@@ -538,7 +553,6 @@ function confirmOrder() {
   if (!name)        { showToast('⚠️ Masukkan nama pemesan dulu!'); return; }
   if (!selectedPay) { showToast('⚠️ Pilih metode pembayaran!');    return; }
 
-  // Validasi stok sebelum lanjut
   if (!validateStock()) return;
 
   if (selectedPay === 'transfer') {
@@ -642,7 +656,9 @@ function qrisConfirm() {
   finishOrder();
 }
 
-/* ── Finish Order ───────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   ── Finish Order (+ Kirim ke Google Sheets) ─────────────────
+   ══════════════════════════════════════════════════════════════ */
 function finishOrder() {
   const name     = document.getElementById('cust-name').value.trim();
   const subtotal = cart.reduce((a, c) => a + c.price * c.qty, 0);
@@ -655,6 +671,19 @@ function finishOrder() {
     qris:     'QRIS',
     ewallet:  'E-Wallet (' + (selectedEw || activeEw) + ')',
   };
+
+  /* ── ✅ KIRIM KE GOOGLE SHEETS ── */
+  kirimKeSheet({
+    nama:    name,
+    noHp:    "-",
+    produk:  cart.map(c => c.name + ' x' + c.qty).join(', '),
+    ukuran:  cart.map(c => c.cat === 'small' ? 'Small' : 'Large').join(', '),
+    qty:     cart.reduce((a, c) => a + c.qty, 0),
+    total:   fmt(total),
+    bayar:   payNames[selectedPay],
+    orderID: orderNum
+  });
+  /* ── ✅ SELESAI KIRIM ── */
 
   document.getElementById('order-number').textContent = orderNum;
   document.getElementById('success-info').textContent =
@@ -687,7 +716,6 @@ function finishOrder() {
     transferNote.style.display = 'none';
   }
 
-  // ← Kurangi stok setelah order berhasil
   deductStock();
 
   document.getElementById('checkout-screen').classList.remove('open');
