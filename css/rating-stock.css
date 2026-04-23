@@ -1,0 +1,88 @@
+/* ─────────────────────────────────────────
+   TAMBAHKAN INI KE BAGIAN BAWAH style.css
+   ───────────────────────────────────────── */
+
+/* ── Rating Stars ── */
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 4px 0 6px;
+}
+
+.star {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.star.full  { color: #f5a623; }
+.star.half  { color: #f5a623; opacity: 0.6; }
+.star.empty { color: #ddd; }
+
+.rating-num {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  margin-left: 3px;
+}
+
+/* Rating di modal */
+#m-rating {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  justify-content: center;
+  margin: 6px 0 4px;
+}
+
+#m-rating .star { font-size: 16px; }
+#m-rating .rating-num { font-size: 13px; color: #666; }
+
+/* ── Stock Badge (di atas gambar) ── */
+.product-stock-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  z-index: 2;
+}
+
+.stock-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.stock-badge.ok  { background: rgba(0,180,100,0.85); color: #fff; }
+.stock-badge.low { background: rgba(255,140,0,0.90); color: #fff; }
+.stock-badge.out { background: rgba(200,0,0,0.85);   color: #fff; }
+
+/* Modal stock badge */
+#m-stock {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+#m-stock .stock-badge {
+  font-size: 12px;
+  padding: 3px 12px;
+}
+
+/* ── Out of Stock card ── */
+.product-card.out-of-stock {
+  opacity: 0.6;
+  pointer-events: auto; /* tetap bisa diklik untuk lihat detail */
+}
+
+.product-card.out-of-stock .add-btn.disabled {
+  background: #ccc !important;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Rating di cart item */
+.cart-item-info .star { font-size: 11px; }
+.cart-item-info .rating-num { font-size: 10px; }

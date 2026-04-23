@@ -1,0 +1,45 @@
+/* ============================================================
+   TAMBAHKAN ini di bagian bawah style.css kamu
+   ============================================================ */
+
+/* E-Wallet Options */
+.ewallet-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ewallet-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--cream-dark);
+  border-radius: 12px;
+  background: var(--white);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  color: var(--brown-dark);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ewallet-btn:hover {
+  border-color: var(--brown-warm);
+  color: var(--brown-warm);
+  background: #FFF8F0;
+}
+
+.ewallet-btn.active-ew {
+  border-color: var(--brown-warm);
+  background: #FFF8F0;
+  color: var(--brown-mid);
+}
+
+.ew-icon {
+  font-size: 18px;
+}
