@@ -6,7 +6,7 @@
 /* ══════════════════════════════════════════════════════════════
    ⚠️  GANTI URL INI dengan URL Apps Script kamu!
    ══════════════════════════════════════════════════════════════ */
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyN5MkdH1YJ_bTZBf-Qnnupd1gQxu8X1MHsSNS8RF5SYi6Xb5y0ngH8GfjHCpMornA/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyt7yOr9mfeVpxvNBXk48dY0gO1X7ISGsey7dMBtSpgEl1KR_eIiP5rITMsbZv70L_R/exec";
 /* ══════════════════════════════════════════════════════════════ */
 
 /* ── Google Sheets: Kirim Data Order ───────────────────────── */
