@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACD Bakery Kiosk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="kiosk-root">
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="header-logo">🎂</div>
+      <div>
+        <div class="header-title">ACD Bakery</div>
+        <div class="header-subtitle">✦ Surga Kue Favorit</div>
+      </div>
+    </div>
+    <button class="cart-btn" onclick="openCart()">
+      🛒 Keranjang
+      <div class="cart-badge" id="cart-badge">0</div>
+    </button>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <h1>Bolu Kukus Spesial 🍰</h1>
+    <p>Lembut di setiap gigitan — pilih varian favoritmu!</p>
+    <div class="hero-wave">
+      <span>✨</span><span>🧁</span><span>✨</span>
+    </div>
+  </section>
+
+  <!-- ===== CATEGORY TABS ===== -->
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('small', this)">
+        🧁 Ukuran Small
+        <div class="tab-desc">6 varian · Rp 15.000–22.000</div>
+      </button>
+      <button class="tab-btn" onclick="switchTab('large', this)">
+        🎂 Ukuran Large
+        <div class="tab-desc">6 varian · Rp 35.000–45.000</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== PRODUCT SECTION ===== -->
+  <main class="products-section">
+    <div id="small-section">
+      <div class="section-label">🧁 Small — Per Pcs</div>
+      <div class="product-grid" id="small-grid"></div>
+    </div>
+    <div id="large-section" style="display:none">
+      <div class="section-label">🎂 Large — Per Kotak</div>
+      <div class="product-grid" id="large-grid"></div>
+    </div>
+  </main>
+
+</div><!-- /.kiosk-root -->
+
+
+<!-- ===== PRODUCT DETAIL MODAL ===== -->
+<div class="modal-overlay" id="product-modal">
+  <div id="m-rating"></div>
+<div id="m-stock"></div>
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-img"  id="m-img"></div>
+    <div class="modal-title"    id="m-name"></div>
+    <div class="modal-category" id="m-cat"></div>
+    <div class="modal-desc"     id="m-desc"></div>
+    <div class="modal-price"    id="m-price"></div>
+    <div class="modal-qty">
+      <button class="qty-btn" onclick="changeModalQty(-1)">−</button>
+      <div class="qty-num" id="m-qty">1</div>
+      <button class="qty-btn" onclick="changeModalQty(1)">+</button>
+      <span class="modal-total" id="m-total"></span>
+    </div>
+    <button class="modal-add-btn" onclick="addFromModal()">+ Tambah ke Keranjang</button>
+  </div>
+</div>
+
+
+<!-- ===== CART PANEL ===== -->
+<div class="cart-panel" id="cart-panel">
+  <div class="cart-backdrop" onclick="closeCart()"></div>
+  <div class="cart-drawer">
+    <div class="cart-header">
+      <h2>🛒 Keranjang Belanja</h2>
+      <button class="cart-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items-list"></div>
+    <div class="cart-footer">
+      <div class="cart-summary" id="cart-summary"></div>
+      <button class="checkout-btn" id="checkout-btn" onclick="goCheckout()">Lanjut Pembayaran →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== CHECKOUT SCREEN ===== -->
+<div class="checkout-screen" id="checkout-screen">
+  <div class="checkout-header">
+    <button class="back-btn" onclick="closeCheckout()">← Kembali</button>
+    <h2>💳 Pembayaran</h2>
+  </div>
+  <div class="checkout-body">
+    <div class="form-group">
+      <label class="form-label">Nama Pemesan</label>
+      <input type="text" class="form-input" id="cust-name" placeholder="Masukkan nama kamu..." />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Metode Pembayaran</label>
+      <div class="payment-methods">
+        <div class="pay-opt" onclick="selectPay(this,'tunai')">
+          <div class="pay-icon">💵</div>
+          <div class="pay-name">Tunai / Cash</div>
+        </div>
+        <div class="pay-opt" onclick="selectPay(this,'transfer')">
+          <div class="pay-icon">🏦</div>
+          <div class="pay-name">Transfer Bank</div>
+        </div>
+        <div class="pay-opt" onclick="selectPay(this,'qris')">
+          <div class="pay-icon">📱</div>
+          <div class="pay-name">QRIS</div>
+        </div>
+        <div class="pay-opt" onclick="selectPay(this,'ewallet')">
+          <div class="pay-icon">💳</div>
+          <div class="pay-name">E-Wallet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSFER BANK PANEL -->
+    <div class="transfer-panel" id="transfer-panel">
+      <div class="transfer-panel-title">🏦 Pilih Bank Tujuan</div>
+      <div class="bank-options">
+        <button class="bank-btn" id="bank-bca"     onclick="selectBank('BCA','8770082003','a.n ACD Bakery')">BCA</button>
+        <button class="bank-btn" id="bank-mandiri" onclick="selectBank('Mandiri','1380019000123','a.n ACD Bakery')">Mandiri</button>
+        <button class="bank-btn" id="bank-bri"     onclick="selectBank('BRI','009301019876530','a.n ACD Bakery')">BRI</button>
+      </div>
+      <div class="transfer-info" id="transfer-info" style="display:none">
+        <div class="transfer-info-row">
+          <span>Bank</span>
+          <strong id="ti-bank"></strong>
+        </div>
+        <div class="transfer-info-row">
+          <span>No. Rekening</span>
+          <strong id="ti-norek"></strong>
+          <button class="copy-btn" onclick="copyNorek()">Salin</button>
+        </div>
+        <div class="transfer-info-row">
+          <span>Atas Nama</span>
+          <strong id="ti-name"></strong>
+        </div>
+        <div class="transfer-info-row highlight">
+          <span>Jumlah Transfer</span>
+          <strong id="ti-amount"></strong>
+        </div>
+
+        <!-- PIN Bank -->
+        <div class="transfer-pin-wrap">
+          <label class="transfer-pin-label">🔒 PIN Bank (6 digit)</label>
+          <div class="pin-inputs" id="pin-inputs">
+            <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+            <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+            <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+            <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+            <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+            <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          </div>
+          <div class="pin-hint">Masukkan PIN mobile banking kamu untuk konfirmasi</div>
+        </div>
+
+        <div class="transfer-note">
+          ⚠️ Transfer tepat sesuai nominal di atas agar pesanan langsung diproses otomatis.
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== E-WALLET PANEL ===== -->
+    <div class="transfer-panel" id="ewallet-panel">
+      <div class="transfer-panel-title">💳 Pilih E-Wallet</div>
+
+      <!-- Tab Pills -->
+      <div class="ew-tabs-new">
+        <button class="ew-tab-new active"
+          data-wallet="GoPay"
+          data-bg="linear-gradient(135deg,#006B39,#00AA5B)"
+          data-num="0812-3456-7890"
+          data-emoji="💚"
+          onclick="selectEwalletNew(this)">
+          <span class="ew-dot" style="background:#00AA5B"></span> GoPay
+        </button>
+        <button class="ew-tab-new"
+          data-wallet="OVO"
+          data-bg="linear-gradient(135deg,#2A1A7A,#6B46C1)"
+          data-num="0812-3456-7890"
+          data-emoji="💜"
+          onclick="selectEwalletNew(this)">
+          <span class="ew-dot" style="background:#6B46C1"></span> OVO
+        </button>
+        <button class="ew-tab-new"
+          data-wallet="DANA"
+          data-bg="linear-gradient(135deg,#0050B3,#1890FF)"
+          data-num="0812-3456-7890"
+          data-emoji="💙"
+          onclick="selectEwalletNew(this)">
+          <span class="ew-dot" style="background:#1890FF"></span> DANA
+        </button>
+        <button class="ew-tab-new"
+          data-wallet="ShopeePay"
+          data-bg="linear-gradient(135deg,#B52D10,#EE4D2D)"
+          data-num="0812-3456-7890"
+          data-emoji="🧡"
+          onclick="selectEwalletNew(this)">
+          <span class="ew-dot" style="background:#EE4D2D"></span> ShopeePay
+        </button>
+        <button class="ew-tab-new"
+          data-wallet="LinkAja"
+          data-bg="linear-gradient(135deg,#9A0A0E,#E82529)"
+          data-num="0812-3456-7890"
+          data-emoji="❤️"
+          onclick="selectEwalletNew(this)">
+          <span class="ew-dot" style="background:#E82529"></span> LinkAja
+        </button>
+      </div>
+
+      <!-- Kartu Gradien -->
+      <div class="ew-card-new" id="ew-card-new" style="background:linear-gradient(135deg,#006B39,#00AA5B)">
+        <div class="ew-card-top">
+          <div>
+            <div class="ew-card-lbl">E-Wallet</div>
+            <div class="ew-card-val" id="ew-card-name">GoPay</div>
+          </div>
+          <div class="ew-card-emoji" id="ew-card-emoji">💚</div>
+        </div>
+        <div>
+          <div class="ew-card-lbl">No. Tujuan</div>
+          <div class="ew-card-val" id="ew-card-num">0812-3456-7890</div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="ew-card-lbl">Atas Nama</div>
+          <div class="ew-card-val">ACD Bakery</div>
+        </div>
+      </div>
+
+      <!-- Info Row -->
+      <div class="transfer-info" id="ewallet-info">
+        <div class="transfer-info-row">
+          <span>No. Tujuan</span>
+          <strong id="ew-number-display">0812-3456-7890</strong>
+          <button class="copy-btn" onclick="copyEwallet()">Salin</button>
+        </div>
+        <div class="transfer-info-row">
+          <span>Atas Nama</span>
+          <strong>ACD Bakery</strong>
+        </div>
+        <div class="transfer-info-row highlight">
+          <span>Jumlah Transfer</span>
+          <strong id="ew-amount-display"></strong>
+        </div>
+        <div class="transfer-note">
+          ⚠️ Transfer tepat sesuai nominal, lalu klik Konfirmasi Pesanan untuk masukkan PIN.
+        </div>
+      </div>
+    </div><!-- /.ewallet-panel -->
+
+    <div class="order-summary">
+      <h3>📋 Ringkasan Pesanan</h3>
+      <div id="checkout-items"></div>
+      <div class="order-total-row">
+        <span>Total Bayar</span>
+        <span id="checkout-total-display"></span>
+      </div>
+    </div>
+    <button class="confirm-btn" onclick="confirmOrder()">✅ Konfirmasi Pesanan</button>
+  </div>
+</div>
+
+
+<!-- ===== PIN E-WALLET MODAL (di luar checkout-screen agar tidak terpotong) ===== -->
+<div class="pin-overlay-ew" id="pin-overlay-ew">
+  <div class="pin-modal-ew">
+    <div id="pin-form-ew">
+      <div class="pin-title-ew">🔒 Masukkan PIN</div>
+      <div class="pin-sub-ew">
+        Konfirmasi pembayaran <strong id="pin-amount-ew"></strong>
+        via <span id="pin-wallet-ew">GoPay</span>
+      </div>
+      <div class="pin-dots-ew">
+        <div class="pin-dot-ew" id="pd0"></div>
+        <div class="pin-dot-ew" id="pd1"></div>
+        <div class="pin-dot-ew" id="pd2"></div>
+        <div class="pin-dot-ew" id="pd3"></div>
+        <div class="pin-dot-ew" id="pd4"></div>
+        <div class="pin-dot-ew" id="pd5"></div>
+      </div>
+      <div class="pin-error-ew" id="pin-error-ew"></div>
+      <div class="pin-keypad-ew">
+        <button class="pin-key-ew" onclick="ewPinPress('1')">1</button>
+        <button class="pin-key-ew" onclick="ewPinPress('2')">2</button>
+        <button class="pin-key-ew" onclick="ewPinPress('3')">3</button>
+        <button class="pin-key-ew" onclick="ewPinPress('4')">4</button>
+        <button class="pin-key-ew" onclick="ewPinPress('5')">5</button>
+        <button class="pin-key-ew" onclick="ewPinPress('6')">6</button>
+        <button class="pin-key-ew" onclick="ewPinPress('7')">7</button>
+        <button class="pin-key-ew" onclick="ewPinPress('8')">8</button>
+        <button class="pin-key-ew" onclick="ewPinPress('9')">9</button>
+        <button class="pin-key-ew pin-empty-ew"></button>
+        <button class="pin-key-ew" onclick="ewPinPress('0')">0</button>
+        <button class="pin-key-ew" onclick="ewPinDel()">⌫</button>
+      </div>
+      <button class="pin-cancel-ew" onclick="closeEwPin()">Batal</button>
+    </div>
+    <div class="pin-success-ew" id="pin-success-ew" style="display:none; flex-direction:column; align-items:center; padding:1rem 0;">
+      <div class="pin-success-icon-ew">✅</div>
+      <div class="pin-title-ew">Pembayaran Berhasil!</div>
+      <div class="pin-sub-ew">Pesanan kamu sedang diproses.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== SUCCESS SCREEN ===== -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">✅</div>
+  <h1>Pesanan Berhasil!</h1>
+  <p>✦ Terima kasih sudah memesan di ACD Bakery ✦</p>
+  <div class="order-num-box">
+    <div class="order-num-label">Nomor Pesanan</div>
+    <div class="order-num" id="order-number">ACD-000000</div>
+  </div>
+  <div class="order-info"   id="success-info"></div>
+  <div class="success-transfer-note" id="success-transfer-note" style="display:none"></div>
+  <div class="order-status">Pesanan sedang diproses... 🔥</div>
+  <button class="new-order-btn" onclick="resetAll()">🔄 Pesan Lagi</button>
+</div>
+
+
+<!-- ===== QRIS MODAL ===== -->
+<div class="modal-overlay" id="qris-modal">
+  <div class="modal qris-modal">
+    <button class="modal-close" onclick="closeQris()">✕</button>
+    <div class="qris-header">
+      <div class="qris-logo">📱</div>
+      <div class="qris-title">Bayar dengan QRIS</div>
+      <div class="qris-subtitle">Scan QR Code menggunakan aplikasi e-wallet kamu</div>
+    </div>
+    <div class="qris-amount-box">
+      <div class="qris-amount-label">Total Pembayaran</div>
+      <div class="qris-amount" id="qris-amount">Rp 0</div>
+    </div>
+    <div class="qris-box">
+      <div class="qris-corner tl"></div>
+      <div class="qris-corner tr"></div>
+      <div class="qris-corner bl"></div>
+      <div class="qris-corner br"></div>
+      <div id="qris-canvas-wrap"></div>
+    </div>
+    <div class="qris-info">
+      <div class="qris-apps">
+        <span>GoPay</span><span>OVO</span><span>Dana</span><span>ShopeePay</span><span>LinkAja</span>
+      </div>
+      <div class="qris-timer-wrap">
+        <span>QR kedaluwarsa dalam</span>
+        <span class="qris-timer" id="qris-timer">05:00</span>
+      </div>
+    </div>
+    <div class="qris-order-id" id="qris-order-id"></div>
+    <button class="modal-add-btn qris-confirm-btn" onclick="qrisConfirm()">
+      ✅ Saya Sudah Bayar
+    </button>
+  </div>
+</div>
+
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+
+<!-- ===== SCRIPTS ===== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+
+<!-- ===== E-WALLET & PIN SCRIPT ===== -->
+<script>
+  /* ── State ── */
+  let ewPin = '';
+  let activeEw = 'GoPay';
+
+  /* ── Ganti tab wallet ── */
+  function selectEwalletNew(btn) {
+    // reset semua tab
+    document.querySelectorAll('.ew-tab-new').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    const wallet = btn.dataset.wallet;
+    const bg     = btn.dataset.bg;
+    const num    = btn.dataset.num;
+    const emoji  = btn.dataset.emoji;
+
+    activeEw = wallet;
+
+    // update kartu
+    document.getElementById('ew-card-new').style.background = bg;
+    document.getElementById('ew-card-name').textContent  = wallet;
+    document.getElementById('ew-card-emoji').textContent = emoji;
+    document.getElementById('ew-card-num').textContent   = num;
+
+    // update info row
+    document.getElementById('ew-number-display').textContent = num;
+
+    // update jumlah jika sudah ada
+    syncEwAmount();
+  }
+
+  function syncEwAmount() {
+    const totalEl = document.getElementById('checkout-total-display');
+    const amtEl   = document.getElementById('ew-amount-display');
+    if (totalEl && amtEl) amtEl.textContent = totalEl.textContent;
+  }
+
+  /* ── Salin nomor ── */
+  function copyEwallet() {
+    const num = document.getElementById('ew-number-display').textContent.replace(/-/g, '');
+    navigator.clipboard.writeText(num).catch(() => {});
+    showToast('Nomor disalin! ✓');
+  }
+
+  /* ── Buka PIN modal ── */
+  function openEwPin() {
+    ewPin = '';
+    updateEwDots();
+    document.getElementById('pin-error-ew').textContent = '';
+    document.getElementById('pin-form-ew').style.display    = 'block';
+    document.getElementById('pin-success-ew').style.display = 'none';
+    document.getElementById('pin-wallet-ew').textContent    = activeEw;
+    syncEwAmount();
+    document.getElementById('pin-amount-ew').textContent =
+      document.getElementById('ew-amount-display').textContent;
+    document.getElementById('pin-overlay-ew').classList.add('show');
+  }
+
+  function closeEwPin() {
+    document.getElementById('pin-overlay-ew').classList.remove('show');
+    ewPin = '';
+    updateEwDots();
+  }
+
+  /* ── Keypad ── */
+  function ewPinPress(d) {
+    if (ewPin.length >= 6) return;
+    ewPin += d;
+    updateEwDots();
+    if (ewPin.length === 6) setTimeout(checkEwPin, 300);
+  }
+
+  function ewPinDel() {
+    ewPin = ewPin.slice(0, -1);
+    updateEwDots();
+    document.getElementById('pin-error-ew').textContent = '';
+  }
+
+  function updateEwDots() {
+    for (let i = 0; i < 6; i++) {
+      const d = document.getElementById('pd' + i);
+      if (!d) return;
+      ewPin.length > i ? d.classList.add('filled') : d.classList.remove('filled');
+    }
+  }
+
+  /* ── Validasi PIN ── */
+  function checkEwPin() {
+    if (ewPin === '123456') {   // ← ganti PIN sesuai kebutuhan
+      document.getElementById('pin-form-ew').style.display    = 'none';
+      document.getElementById('pin-success-ew').style.display = 'flex';
+      setTimeout(() => {
+        closeEwPin();
+        // jalankan confirmOrder asli setelah PIN benar
+        if (typeof _origConfirmOrder === 'function') {
+          _origConfirmOrder();
+        }
+      }, 1800);
+    } else {
+      document.getElementById('pin-error-ew').textContent = 'PIN salah. Coba lagi.';
+      ewPin = '';
+      updateEwDots();
+    }
+  }
+
+  /* ── Tutup jika klik backdrop ── */
+  document.getElementById('pin-overlay-ew').addEventListener('click', function(e) {
+    if (e.target === this) closeEwPin();
+  });
+
+  /* ── Override confirmOrder: kalau ewallet → buka PIN dulu ── */
+  window.addEventListener('load', function () {
+    // simpan fungsi asli dari app.js
+    if (typeof confirmOrder === 'function') {
+      window._origConfirmOrder = confirmOrder;
+    }
+
+    window.confirmOrder = function () {
+      const selected = document.querySelector('.pay-opt.selected');
+      const method   = selected ? selected.querySelector('.pay-name').textContent.trim() : '';
+
+      if (method === 'E-Wallet') {
+        syncEwAmount();
+        openEwPin();
+      } else {
+        if (typeof _origConfirmOrder === 'function') _origConfirmOrder();
+      }
+    };
+  });
+
+  /* ── Sync jumlah saat ewallet panel tampil ── */
+  window.addEventListener('load', function () {
+    const orig = window.selectPay;
+    window.selectPay = function(el, method) {
+      orig && orig(el, method);
+      if (method === 'ewallet') syncEwAmount();
+    };
+  });
+</script>
+
+</body>
+</html>
